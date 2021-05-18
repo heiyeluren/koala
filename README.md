@@ -220,11 +220,15 @@ Koala 的开发，很大一部分工作是实现对策略配置的解析，以�
 ---
 
 
-### 使用说明 & 技术交流
+### Koala 使用 & 技术交流
 
 欢迎各位喜欢Koala的技术伙伴给本软件点一个“**Star**”，也希望能够共同交流！
 
 <br />
+
+##### 想直接运行体验Koala服务请参考文档：
+https://github.com/heiyeluren/koala/tree/main/output
+
 
 ##### 更多使用说明参考文档：
 https://github.com/heiyeluren/koala/tree/main/doc
