@@ -1,6 +1,6 @@
 ### Koala通用频率控制系统说明
 ###### 黑夜路人（heiyeluren）
-
+###### 2013.8
 
 
 ### 概要
@@ -31,7 +31,7 @@ koala系统同时也以“高性能”为目标之一。采用GO语言实现，�
 koala服务，是单进程，多线程，多协程（goroutine）结构模式。
 
 图1
-![image](https://raw.githubusercontent.com/heiyeluren/docs/master/files/koala_01.png)
+![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala_01.png)
 
 
 其总体结构如图1所示。
