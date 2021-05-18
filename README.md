@@ -232,12 +232,12 @@ https://github.com/heiyeluren/koala/tree/main/doc
 <br />
 
 ##### 加入微信群交流
-![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala-wx-group.jpg)
+![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala_wx_group.png)
 
 <br />
 
 ##### 群失效可添加作者微信加群
-![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala-wx.jpg)
+![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala_wx.png)
 
 
 Last update: 2021/5/*19*
