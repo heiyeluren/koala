@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+#
+# Koala Server Admin Script
+# 
+# @author: heiyeluren
+# @date: 2016/12/13
+#
+
+CURR_DIR=$PWD
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+cd $SCRIPTPATH && cd ..
+KOALA_HOME=$PWD
+cd $CURR_DIR
+
+KOALA_PID="$KOALA_HOME/data/koala.pid"
+KOALA_BIN="$KOALA_HOME/bin/koala"
+KOALA_CONF="$KOALA_HOME/conf/koala.conf"
+KOALA_PANICLOG="$KOALA_HOME/log/panic-koala.log"
+
+
+
+case $1 in
+
+#start server
+start) 
+
+    if [ -f $KOALA_PID ]; then
+        echo "koala server is running. don't repeat start koala."
+        exit 0
+    fi
+    
+    export GOGC=200
+    
+    echo 'koala start server...'
+    
+    $KOALA_BIN -f $KOALA_CONF 2>$KOALA_PANICLOG &
+    usleep 300000
+    
+    if [ -f $KOALA_PID ]; then
+        echo 'koala start ok'
+    else 
+        echo 'koala start fail'
+    fi
+;;
+
+#stop server
+stop)
+
+    if [ ! -f $KOALA_PID ]; then
+        echo "koala server not running. "
+        exit 0
+    fi
+    
+    echo 'koala stop server...'
+
+    kill -9 `cat $KOALA_PID`
+    usleep 300000
+    rm -f $KOALA_PID
+    usleep 200000
+    
+    if [ ! -f $KOALA_PID ]; then
+        echo 'koala stop ok'
+    else 
+        echo 'koala stop fail'
+    fi
+;;
+
+#restart server
+restart)
+
+    if [ -f $KOALA_PID ]; then
+        echo 'koala stop server...'
+        kill -9 `cat $KOALA_PID`
+        usleep 300000
+        rm -f $KOALA_PID
+        usleep 200000
+
+        if [ ! -f $KOALA_PID ]; then
+            echo 'koala stop ok'
+        else 
+            echo 'koala stop fail'
+            exit 0
+        fi
+    fi
+
+    export GOGC=200
+    
+    echo 'koala restart server...'
+    
+    $KOALA_BIN -f $KOALA_CONF 2>$KOALA_PANICLOG &
+    usleep 300000
+    
+    if [ -f $KOALA_PID ]; then
+        echo 'koala restart ok'
+    else 
+        echo 'koala restart fail'
+    fi
+;;
+
+esac
+
