@@ -13,6 +13,7 @@ wget https://raw.githubusercontent.com/heiyeluren/koala/main/output/koala_online
 
 tar zxvf koala_online.tar.gz
 cd koala_online
+sh +x bin/*
 bin/koala_ctl start
 
 ```
