@@ -1,1 +1,8 @@
-依赖于：github.com/garyburd/redigo/redis 库
+Redis客户端库依赖于：
+github.com/garyburd/redigo/redis 
+
+
+说明：
+
+实际使用中，可以使用新版本的 github.com/go-redis/redis 库进行取代，需要自己调整部分import库。
+
