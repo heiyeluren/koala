@@ -1,5 +1,18 @@
 <?php
 /**
+ * Koala Rule Engine PHP SDK
+ *
+ * @package: main
+ * @desc: koala engine - PHP SDK code
+ *
+ * @author: heiyeluren 
+ * @github: https://github.com/heiyeluren
+ * @blog: https://blog.csdn.net/heiyeshuwu
+ *
+ */
+
+
+/**
  * 调用 koala 服务的 sdk 代码
  */
 
