@@ -1,3 +1,15 @@
+/**
+ * Koala Rule Engine Core
+ *
+ * @package: main
+ * @desc: koala engine - Dict list parser & loader
+ *
+ * @author: heiyeluren 
+ * @github: https://github.com/heiyeluren
+ * @blog: https://blog.csdn.net/heiyeshuwu
+ *
+ */
+
 package main
 
 import (
