@@ -1,10 +1,17 @@
 /**
- * 名称：koala频率控制服务
+ * Koala Rule Engine Core
  *
- * 用途：是为了解决用户提交等相关频率控制的一个通用服务，主要是为了替换360问答原有的基于php+memcache频率控制模块，
- *       以达到 高性能、灵活配置的要求。
+ * @package: main
+ * @desc: koala engine - Main router
  *
- * 方案：支持高度灵活的规则配置；并实现了规则配置的动态加载； 后端cache采用带连接池的redis。
+ * koala频率控制服务 (规则引擎)
+ * 用途：是为了解决用户提交等相关频率控制的一个通用服务，主要是为了替换传统写死代码的频率控制模块以达到 高性能、灵活配置的要求。
+ * 方案：支持高度灵活的规则配置；并实现了规则配置的动态加载； 后端cache采用带连接池的redis。 
+ *
+ * @author: heiyeluren 
+ * @github: https://github.com/heiyeluren
+ * @blog: https://blog.csdn.net/heiyeshuwu
+ *
  */
 
 package main
