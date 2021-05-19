@@ -1,12 +1,21 @@
 <?php
+/**
+ * Koala Rule Engine SDK
+ *
+ * @package: main
+ * @desc: koala engine - php sdk code
+ *
+ * @author: heiyeluren 
+ * @github: https://github.com/heiyeluren
+ * @blog: https://blog.csdn.net/heiyeshuwu
+ *
+ */
 
 /**
  * @概述：此sdk，一方面，实现对koala频率控制服务http接口的简单封装，方便用户调用，
  *        另一方面，我们也推荐您直接调用http接口，sdk给出了接口的请求示例，供参考。
  * 
  * @注意：使用时，请自行在construct函数中传入koala服务的 “ host:port ”，本sdk不维护server地址配置。
- * 
- * @author: chenpeng@360.cn
  */
 
 class KoalaSdk
