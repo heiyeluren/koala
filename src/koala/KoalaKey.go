@@ -1,3 +1,15 @@
+/**
+ * Koala Rule Engine Core
+ *
+ * @package: main
+ * @desc: koala engine code
+ *
+ * @author: heiyeluren 
+ * @github: https://github.com/heiyeluren
+ * @blog: https://blog.csdn.net/heiyeshuwu
+ *
+ */
+
 package main
 
 import (
