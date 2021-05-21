@@ -225,6 +225,8 @@ Koala 的开发，很大一部分工作是实现对策略配置的解析，以�
 欢迎各位喜欢Koala的技术伙伴给本软件点一个“**Star**”，也希望能够共同交流！
 
 <br />
+##### Koala快速了解
+https://github.com/heiyeluren/koala/blob/main/README.md
 
 ##### 想直接运行体验Koala服务请参考文档：
 https://github.com/heiyeluren/koala/tree/main/output
@@ -232,6 +234,8 @@ https://github.com/heiyeluren/koala/tree/main/output
 ##### 想要了解Koala强大功能可以参考现有规则配置文件（感受一下如何配置和Koala规则引擎的强大功能）
 https://github.com/heiyeluren/koala/blob/main/doc/Koala%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%A0%B7%E5%BC%8F.txt
 
+##### Koala核心统计算法实现速览
+https://github.com/heiyeluren/koala/blob/main/doc/README.md
 
 ##### 更多使用说明参考文档：
 https://github.com/heiyeluren/koala/tree/main/doc
