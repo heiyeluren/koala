@@ -229,6 +229,9 @@ Koala 的开发，很大一部分工作是实现对策略配置的解析，以�
 ##### 想直接运行体验Koala服务请参考文档：
 https://github.com/heiyeluren/koala/tree/main/output
 
+##### 想要了解可以有多强大功能参考现有规则配置文件（感受一下如何配置和强大功能）
+https://github.com/heiyeluren/koala/blob/main/doc/Koala%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%A0%B7%E5%BC%8F.txt
+
 
 ##### 更多使用说明参考文档：
 https://github.com/heiyeluren/koala/tree/main/doc
