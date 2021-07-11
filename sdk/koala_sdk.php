@@ -161,7 +161,7 @@ class KoalaSdk
 
     /* monitorAlive *
      * 用途：   koala服务的监控接口，能保证 ： koala存活，以及koala与redis直接的 “连通性”
-     * 接口url：      GET /rule/update
+     * 接口url：      GET /monitor/alive
      *
      * @ 返回值：
      *         errno      错误码
