@@ -22,7 +22,7 @@ package main
 
 import (
     "errors"
-    "github.com/garyburd/redigo/redis"
+    "github.com/gomodule/redigo/redis"
     "sort"
     "strconv"
     "strings"
@@ -52,7 +52,7 @@ type KoalaRule struct {
 /**
  * 浏览；count规则缓存查询、比较
  */
-func (this *KoalaRule) countBrowse(cacheKey string) (bool, error) {
+func (k *KoalaRule) countBrowse(cacheKey string) (bool, error) {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
@@ -67,7 +67,7 @@ func (this *KoalaRule) countBrowse(cacheKey string) (bool, error) {
         return false, err
     }
     //println(cacheKey, " --> value:", cacheValue)
-    if this.count == 0 || this.count > int32(cacheValue) {
+    if k.count == 0 || k.count > int32(cacheValue) {
         return false, nil
     }
     return true, nil
@@ -76,7 +76,7 @@ func (this *KoalaRule) countBrowse(cacheKey string) (bool, error) {
 /**
  * 更新；count规则缓存更新
  */
-func (this *KoalaRule) countUpdate(cacheKey string) error {
+func (k *KoalaRule) countUpdate(cacheKey string) error {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
@@ -87,18 +87,18 @@ func (this *KoalaRule) countUpdate(cacheKey string) error {
     }
     // set new cache
     if exists == 0 {
-        var expiretime int32
+        var expireTime int32
         // 86400 按照 自然天计算 过期时间
-        if this.time == 86400 {
+        if k.time == 86400 {
             y, m, d := time.Now().Date()
             loc, _ := time.LoadLocation("Asia/Shanghai")
             dayEnd := time.Date(y, m, d, 23, 59, 59, 0, loc).Unix()
-            expiretime = int32(dayEnd - time.Now().Unix())
+            expireTime = int32(dayEnd - time.Now().Unix())
         } else {
-            expiretime = this.time
+            expireTime = k.time
         }
 
-        if _, err := redis.String(redisConn.Do("SETEX", cacheKey, expiretime, 1)); err != nil {
+        if _, err := redis.String(redisConn.Do("SETEX", cacheKey, expireTime, 1)); err != nil {
             return err
         }
 
@@ -149,7 +149,7 @@ func (this *KoalaRule) countUpdate(cacheKey string) error {
  * leak模式--查询
  *
  */
-func (this *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
+func (k *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
@@ -159,7 +159,7 @@ func (this *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
     if listLen, err = redis.Int(redisConn.Do("LLEN", cacheKey)); err != nil {
         return false, err
     }
-    if listLen == 0 || listLen <= int(this.count) {
+    if listLen == 0 || listLen <= int(k.count) {
         return false, nil
     }
 
@@ -168,10 +168,10 @@ func (this *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
     }()
 
     now := time.Now().Unix()
-    if edgeElement, err = redis.Int64(redisConn.Do("LINDEX", cacheKey, this.count)); err != nil {
+    if edgeElement, err = redis.Int64(redisConn.Do("LINDEX", cacheKey, k.count)); err != nil {
         return false, err
     }
-    if int32(now-edgeElement) <= this.time {
+    if int32(now-edgeElement) <= k.time {
         return true, nil
     }
     return false, nil
@@ -181,11 +181,11 @@ func (this *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
  * leak模式--清理
  * 清理队尾过期多余元素
  */
-func (this *KoalaRule) leakClear(cacheKey string, listLen int) {
+func (k *KoalaRule) leakClear(cacheKey string, listLen int) {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
-    for listLen > int(this.count+1) {
+    for listLen > int(k.count+1) {
         if _, err := redis.Int64(redisConn.Do("RPOP", cacheKey)); err != nil {
             return
         }
@@ -196,7 +196,7 @@ func (this *KoalaRule) leakClear(cacheKey string, listLen int) {
 /**
  * leak模式--更新
  */
-func (this *KoalaRule) leakUpdate(cacheKey string) error {
+func (k *KoalaRule) leakUpdate(cacheKey string) error {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
@@ -214,7 +214,7 @@ func (this *KoalaRule) leakUpdate(cacheKey string) error {
  * leak模式--反馈
  * 根据指令，减少桶内若干元素
  */
-func (this *KoalaRule) leakFeedback(cacheKey string, feedback int) error {
+func (k *KoalaRule) leakFeedback(cacheKey string, feedback int) error {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
