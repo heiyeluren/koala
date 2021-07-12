@@ -4,25 +4,24 @@
  * @package: main
  * @desc: koala engine - admin web api
  *
- * @author: heiyeluren 
+ * @author: heiyeluren
  * @github: https://github.com/heiyeluren
  * @blog: https://blog.csdn.net/heiyeshuwu
  *
  */
 
-package main
+package koala
 
 /*
 import (
     "fmt"
     "io/ioutil"
     "os"
-    "utility/logger"
-    "utility/network"
+    "github.com/heiyeluren/koala/utility"
 )
 
 暂时删除
-func (this *FrontServer) DoRuleRewrite(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleRewrite(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     ext_stream := request.Pstr("rule_stream")
     if ext_stream == "" {
         response.Puts(`{"errno": -1, "errmsg": "no rule stream"}`)
@@ -46,7 +45,7 @@ func (this *FrontServer) DoRuleRewrite(request *network.HttpRequest, response *n
 */
 
 /*
-func (this *FrontServer) DoDumpCounter(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoDumpCounter(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     retString := ""
     rule_no := int32(request.Gint("rule_no"))
     counters := GetCurrentCounters()

@@ -4,13 +4,13 @@
  * @package: main
  * @desc: koala engine - Access http api list
  *
- * @author: heiyeluren 
+ * @author: heiyeluren
  * @github: https://github.com/heiyeluren
  * @blog: https://blog.csdn.net/heiyeshuwu
  *
  */
 
-package main
+package koala
 
 /*
 线上提供接口列表

@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"time"
@@ -18,8 +18,8 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-// initRedisPool redis连接池初始化函数
-func initRedisPool() {
+// InitRedisPool redis连接池初始化函数
+func InitRedisPool() {
 	// redis服务 host:port
 	var server string = Config.Get("redis_server")
 	// redis服务 口令
@@ -43,7 +43,7 @@ func initRedisPool() {
 			if err != nil {
 				return nil, err
 			}
-			if _, err := c.Do("AUTH", password); err != nil {
+			if _, err = c.Do("AUTH", password); err != nil {
 				c.Close()
 				return nil, err
 			}

@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"encoding/json"
@@ -39,7 +39,7 @@ type RetValue struct {
 // 其中 rule 是主体，dicts、和 retValue 会被 rule引用到
 type Policy struct {
 	dictsTable    map[string]map[string]string
-	ruleTable     []KoalaRule
+	ruleTable     []Rule
 	retValueTable map[int]RetValue
 }
 
@@ -59,7 +59,7 @@ var (
 func NewPolicy() *Policy {
 	return &Policy{
 		dictsTable:    make(map[string]map[string]string),
-		ruleTable:     make([]KoalaRule, 0, 50),
+		ruleTable:     make([]Rule, 0, 50),
 		retValueTable: make(map[int]RetValue),
 	}
 }
@@ -108,7 +108,7 @@ func PolicyInterpreter(extStream string) error {
 		if line == "" || line[0] == '#' {
 			continue
 		}
-		if err := dictsBuilder(line); err != nil {
+		if err = dictsBuilder(line); err != nil {
 			return errors.New(err.Error() + "  ;AT-LINE-" + strconv.Itoa(index) + "; " + line)
 		}
 	}
@@ -119,7 +119,7 @@ func PolicyInterpreter(extStream string) error {
 		if line == "" || line[0] == '#' {
 			continue
 		}
-		if err := rulesBuilder(line); err != nil {
+		if err = rulesBuilder(line); err != nil {
 			return errors.New(err.Error() + "  ;AT-LINE-" + strconv.Itoa(index) + "; " + line)
 		}
 		//println(line)
@@ -131,7 +131,7 @@ func PolicyInterpreter(extStream string) error {
 		if line == "" || line[0] == '#' {
 			continue
 		}
-		if err := resultsBuilder(line); err != nil {
+		if err = resultsBuilder(line); err != nil {
 			return errors.New(err.Error() + "  ;AT-LINE-" + strconv.Itoa(index) + "; " + line)
 		}
 	}
@@ -155,7 +155,7 @@ func rulesBuilder(rule string) error {
 	parts := strings.SplitN(rule, ":", 2)
 	if len(parts) == 2 && strings.EqualFold(strings.Trim(parts[0], emptyRunes), "rule") {
 		//
-		var singleRule KoalaRule
+		var singleRule Rule
 		if err := singleRule.Constructor(parts[1]); err != nil {
 			return err
 		}
@@ -229,7 +229,7 @@ func ruleValidityCheck() error {
 	var returnMap = make(map[int32]string)
 
 	for _, singleRule := range TempPolicy.ruleTable {
-		switch singleRule.methord {
+		switch singleRule.method {
 		case "direct":
 			break
 		case "count":

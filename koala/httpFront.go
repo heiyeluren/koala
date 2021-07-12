@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"reflect"
@@ -18,8 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/heiyeluren/koala/utility/logger"
-	"github.com/heiyeluren/koala/utility/network"
+	"github.com/heiyeluren/koala/utility"
 )
 
 var frontPattern = regexp.MustCompile("^[a-z][0-9a-z_]*/[a-z][0-9a-z_]*$")
@@ -34,7 +33,7 @@ func NewFrontServer() *FrontServer {
 
 // FrontListen .
 func FrontListen() {
-	tcpListener, err := network.TcpListen(Config.Get("listen"))
+	tcpListener, err := utility.TcpListen(Config.Get("listen"))
 	if err != nil {
 		panic(err.Error())
 	}
@@ -43,22 +42,22 @@ func FrontListen() {
 		if err != nil {
 			continue
 		}
-		go FrontDispatch(network.NewHttpConnection(tcpConnection))
+		go FrontDispatch(utility.NewHttpConnection(tcpConnection))
 	}
 }
 
 // FrontDispatch .
-func FrontDispatch(httpConnection *network.HttpConnection) {
+func FrontDispatch(httpConnection *utility.HttpConnection) {
 	defer httpConnection.Close()
 
 	request, err := httpConnection.ReadRequest(time.Duration(Config.GetInt("externalReadTimeout")) * time.Millisecond)
 	if err != nil {
 		return
 	}
-	response := network.NewHttpResponse()
+	response := utility.NewHttpResponse()
 
 	// 生成log句柄
-	logHandle := logger.NewLogger("")
+	logHandle := utility.NewLogger("")
 
 	pathInfo := strings.Trim(request.PathInfo(), "/")
 	parts := strings.Split(pathInfo, "/")
@@ -85,7 +84,7 @@ finished:
 	httpConnection.WriteResponse(response, time.Duration(Config.GetInt("externalWriteTimeout"))*time.Millisecond)
 }
 
-func requestLogWrite(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func requestLogWrite(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	if request.PathInfo() == "/multi/browse" {
 		// 批量接口，不在此记录notice，在接口内部记录
 		return

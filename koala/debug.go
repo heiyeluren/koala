@@ -4,27 +4,26 @@
  * @package: main
  * @desc: koala engine - Test case code
  *
- * @author: heiyeluren 
+ * @author: heiyeluren
  * @github: https://github.com/heiyeluren
  * @blog: https://blog.csdn.net/heiyeshuwu
  *
  */
 
-package main
+package koala
 
 // 测试使用 暂时删除
 /*
 import (
     "fmt"
-    "github.com/garyburd/redigo/redis"
+    "github.com/gomodule/redigo/redis"
     "runtime"
     "strconv"
     "time"
-    "utility/logger"
-    "utility/network"
+    "github.com/heiyeluren/koala/utility"
 )
 
-func (this *FrontServer) DoLogTest(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoLogTest(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     logHandle.Debug("[clientip=192.168.0.1 errno=0 errmsg=ok  debuginfo]")
     logHandle.Trace("[clientip=192.168.0.1 errno=0 errmsg=ok  traceinfo]")
     logHandle.Warning("warning test")
@@ -34,14 +33,14 @@ func (this *FrontServer) DoLogTest(request *network.HttpRequest, response *netwo
     response.SetCode(200)
 }
 
-func (this *FrontServer) DoDumpPolicy(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoDumpPolicy(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     println(request.GetRemoteIP())
 
     var dumpString string = ""
     var localPolicy *Policy = GlobalPolicy
     for _, singleRule := range localPolicy.ruleTable {
         var singleDump string = ""
-        singleDump += "methord_ " + singleRule.methord
+        singleDump += "methord_ " + singleRule.method
         singleDump += " _keys_ " + dumpkeys(singleRule.keys)
         singleDump += " _base_ " + strconv.Itoa(int(singleRule.base))
         singleDump += " _time_ " + strconv.Itoa(int(singleRule.time))
@@ -62,7 +61,7 @@ func dumpkeys(keys map[string]KoalaKey) string {
     return ret
 }
 
-func (this *FrontServer) DoRedisCmd(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRedisCmd(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 
@@ -86,7 +85,7 @@ func (this *FrontServer) DoRedisCmd(request *network.HttpRequest, response *netw
     response.SetCode(200)
 }
 
-func (this *FrontServer) DoRedisMget(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRedisMget(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     redisConn := RedisPool.Get()
     defer redisConn.Close()
 

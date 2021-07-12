@@ -10,23 +10,23 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"flag"
 
-	"github.com/heiyeluren/koala/utility/configs"
+	"github.com/heiyeluren/koala/utility"
 )
 
-// 启动前加载配置文件
-func newConfig() *configs.Config {
+// NewConfig 启动前加载配置文件
+func NewConfig() *utility.Config {
 	var F string
 	flag.StringVar(&F, "f", "", "config file")
 	flag.Parse()
 	if F == "" {
 		panic("usage: ./koala -f etc/koala.conf")
 	}
-	config := configs.NewConfig()
+	config := utility.NewConfig()
 	if err := config.Load(F); err != nil {
 		panic(err.Error())
 	}

@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"errors"
@@ -27,9 +27,9 @@ const (
 	BaseKeySuffix = "_B"
 )
 
-// KoalaRule rule类型
-type KoalaRule struct {
-	methord    string //只能为如下四个字符串 count base direct leak
+// Rule rule类型
+type Rule struct {
+	method     string //只能为如下四个字符串 count base direct leak
 	keys       map[string]KoalaKey
 	base       int32
 	time       int32
@@ -45,7 +45,7 @@ type KoalaRule struct {
 ************************************************************/
 
 // Constructor .KoalaRule 的构造器
-func (k *KoalaRule) Constructor(r string) error {
+func (k *Rule) Constructor(r string) error {
 	// [direct] [qid @ global_qid_whitelist] [time=1; count=0;] [result=1; return=101]
 	// [count] [act=ask;qid=+;] [time=2; count=1;] [result=2; return=201]
 	// [base] [act=ask;ip=+;] [base=50; time=10; count=1;] [result=2; return=203]
@@ -56,9 +56,9 @@ func (k *KoalaRule) Constructor(r string) error {
 	for i := range sections {
 		sections[i] = strings.Trim(sections[i], emptyRunes+"[]")
 	}
-	k.methord = sections[0]
-	if k.methord != "count" && k.methord != "base" && k.methord != "direct" && k.methord != "leak" {
-		return errors.New("rule syntax error: methord error")
+	k.method = sections[0]
+	if k.method != "count" && k.method != "base" && k.method != "direct" && k.method != "leak" {
+		return errors.New("rule syntax error: method error")
 	}
 	k.keys = make(map[string]KoalaKey, 10)
 	if err := k.getKeys(sections[1]); err != nil {
@@ -74,7 +74,7 @@ func (k *KoalaRule) Constructor(r string) error {
 /**
  * 解析 KoalaRule 的 count、returnCode 等 参数
  */
-func (k *KoalaRule) getCountAndRet(val, ret string) error {
+func (k *Rule) getCountAndRet(val, ret string) error {
 	val = strings.Trim(val, emptyRunes+";")
 	ret = strings.Trim(ret, emptyRunes+";")
 	vals := strings.Split(val, ";")
@@ -131,7 +131,7 @@ func (k *KoalaRule) getCountAndRet(val, ret string) error {
 /**
  * 解析 KoalaRule 的 keys 参数
  */
-func (k *KoalaRule) getKeys(ki string) error {
+func (k *Rule) getKeys(ki string) error {
 	// act=ask;ip=+;
 	ki = strings.Trim(ki, emptyRunes+";")
 	allKey := strings.Split(ki, ";")
@@ -207,7 +207,7 @@ func (k *KoalaRule) getKeys(ki string) error {
 /**
  * 缓存 key 拼装函数
  */
-func (k *KoalaRule) getCacheKey(gets map[string]string) string {
+func (k *Rule) getCacheKey(gets map[string]string) string {
 	// cacheKey，先加上 r101 形式的前缀，代表所属规则，101等同于规则returnCode
 	cacheKey := "r" + strconv.Itoa(int(k.returnCode))
 
@@ -241,7 +241,7 @@ func (k *KoalaRule) getCacheKey(gets map[string]string) string {
 /**
  * 查询：查询规则当前的缓存值
  */
-func (k *KoalaRule) getCacheValue(cacheKey string) (int, error) {
+func (k *Rule) getCacheValue(cacheKey string) (int, error) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -262,7 +262,7 @@ func (k *KoalaRule) getCacheValue(cacheKey string) (int, error) {
 /**
  * 浏览；count规则缓存查询、比较
  */
-func (k *KoalaRule) countBrowse(cacheKey string) (bool, error) {
+func (k *Rule) countBrowse(cacheKey string) (bool, error) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -286,7 +286,7 @@ func (k *KoalaRule) countBrowse(cacheKey string) (bool, error) {
 /**
  * 更新；count规则缓存更新
  */
-func (k *KoalaRule) countUpdate(cacheKey string) error {
+func (k *Rule) countUpdate(cacheKey string) error {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -326,7 +326,7 @@ func (k *KoalaRule) countUpdate(cacheKey string) error {
 /**
  * 浏览；base方法缓存查询、比较
  */
-func (k *KoalaRule) baseBrowse(cacheKey string) (bool, error) {
+func (k *Rule) baseBrowse(cacheKey string) (bool, error) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -365,20 +365,19 @@ func (k *KoalaRule) baseBrowse(cacheKey string) (bool, error) {
 /**
  * 更新；base方法缓存更新
  */
-func (k *KoalaRule) baseUpdate(cacheKey string) error {
+func (k *Rule) baseUpdate(cacheKey string) error {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
-	var exists int
-	var err error
-	if exists, err = redis.Int(redisConn.Do("EXISTS", cacheKey)); err != nil {
+	exists, err := redis.Int(redisConn.Do("EXISTS", cacheKey))
+	if err != nil {
 		return err
 	}
 	if exists == 0 {
 		y, m, d := time.Now().Date()
 		dayEnd := time.Date(y, m, d, 23, 59, 59, 0, time.UTC).Unix()
 		expireTime := int32(dayEnd - time.Now().Unix())
-		if _, err := redis.String(redisConn.Do("SETEX", cacheKey, expireTime, 1)); err != nil {
+		if _, err = redis.String(redisConn.Do("SETEX", cacheKey, expireTime, 1)); err != nil {
 			return err
 		}
 
@@ -394,17 +393,17 @@ func (k *KoalaRule) baseUpdate(cacheKey string) error {
 		return nil
 	}
 
-	var cacheKeyTime string = cacheKey + BaseKeySuffix
+	var cacheKeyTime = cacheKey + BaseKeySuffix
 	if exists, err = redis.Int(redisConn.Do("EXISTS", cacheKeyTime)); err != nil {
 		return err
 	}
 	if exists == 0 {
-		if _, err := redis.String(redisConn.Do("SETEX", cacheKeyTime, k.time, 1)); err != nil {
+		if _, err = redis.String(redisConn.Do("SETEX", cacheKeyTime, k.time, 1)); err != nil {
 			return err
 		}
 		return nil
 	}
-	if _, err := redis.Int(redisConn.Do("INCR", cacheKeyTime)); err != nil {
+	if _, err = redis.Int(redisConn.Do("INCR", cacheKeyTime)); err != nil {
 		return err
 	}
 	return nil
@@ -414,14 +413,12 @@ func (k *KoalaRule) baseUpdate(cacheKey string) error {
  * leak模式--查询
  *
  */
-func (k *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
+func (k *Rule) leakBrowse(cacheKey string) (bool, error) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
-	var err error
-	var listLen int
-	var edgeElement int64
-	if listLen, err = redis.Int(redisConn.Do("LLEN", cacheKey)); err != nil {
+	listLen, err := redis.Int(redisConn.Do("LLEN", cacheKey))
+	if err != nil {
 		return false, err
 	}
 	if listLen == 0 || listLen <= int(k.count) {
@@ -433,6 +430,7 @@ func (k *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
 	}()
 
 	now := time.Now().Unix()
+	var edgeElement int64
 	if edgeElement, err = redis.Int64(redisConn.Do("LINDEX", cacheKey, k.count)); err != nil {
 		return false, err
 	}
@@ -446,7 +444,7 @@ func (k *KoalaRule) leakBrowse(cacheKey string) (bool, error) {
  * leak模式--清理
  * 清理队尾过期多余元素
  */
-func (k *KoalaRule) leakClear(cacheKey string, listLen int) {
+func (k *Rule) leakClear(cacheKey string, listLen int) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -461,7 +459,7 @@ func (k *KoalaRule) leakClear(cacheKey string, listLen int) {
 /**
  * leak模式--更新
  */
-func (k *KoalaRule) leakUpdate(cacheKey string) error {
+func (k *Rule) leakUpdate(cacheKey string) error {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -479,7 +477,7 @@ func (k *KoalaRule) leakUpdate(cacheKey string) error {
  * leak模式--反馈
  * 根据指令，减少桶内若干元素
  */
-func (k *KoalaRule) leakFeedback(cacheKey string, feedback int) error {
+func (k *Rule) leakFeedback(cacheKey string, feedback int) error {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
@@ -495,28 +493,28 @@ func (k *KoalaRule) leakFeedback(cacheKey string, feedback int) error {
 /**
  * 多重浏览；direct规则直接判定
  */
-func (k *KoalaRule) multiDirectBrowse(cacheKeys []interface{}) (map[string]bool, error) {
+func (k *Rule) multiDirectBrowse(cacheKeys []interface{}) (map[string]bool, error) {
 	return nil, nil
 }
 
 /**
  * 多重浏览；count规则缓存查询、比较
  */
-func (k *KoalaRule) multiCountBrowse(cacheKeys []interface{}) (map[string]bool, error) {
+func (k *Rule) multiCountBrowse(cacheKeys []interface{}) (map[string]bool, error) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
 
 	multiResult := make(map[string]bool, len(cacheKeys))
 	cacheVals := make([]int, len(cacheKeys))
 	intf := []interface{}{}
-	for i, _ := range cacheVals {
+	for i := range cacheVals {
 		intf = append(intf, &cacheVals[i])
 	}
 	reply, err := redis.Values(redisConn.Do("MGET", cacheKeys...))
 	if err != nil {
 		return nil, err
 	}
-	if _, err := redis.Scan(reply, intf...); err != nil {
+	if _, err = redis.Scan(reply, intf...); err != nil {
 		return nil, err
 	}
 
@@ -534,6 +532,6 @@ func (k *KoalaRule) multiCountBrowse(cacheKeys []interface{}) (map[string]bool, 
 /**
  * 多重浏览；base方法缓存查询、比较
  */
-func (k *KoalaRule) multiBaseBrowse(cacheKeys []interface{}) (map[string]bool, error) {
+func (k *Rule) multiBaseBrowse(cacheKeys []interface{}) (map[string]bool, error) {
 	return nil, nil
 }

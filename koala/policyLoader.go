@@ -10,9 +10,10 @@
  *
  */
 
-package main
+package koala
 
 import (
+	"bytes"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -20,7 +21,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/heiyeluren/koala/utility/logger"
+	"github.com/heiyeluren/koala/utility"
 )
 
 // NewPolicyMD5 PolicyMd5 初始化函数
@@ -28,6 +29,7 @@ func NewPolicyMD5() string {
 	m, err := PolicyMD5Str()
 	if err != nil {
 		// error log
+		return ""
 	}
 	return m
 }
@@ -38,7 +40,7 @@ func NewPolicyMD5() string {
 func PolicyLoader() {
 	var err error
 	var m string
-	logHandle := logger.NewLogger("")
+	logHandle := utility.NewLogger("")
 
 	for {
 		d := Config.GetInt("policy_loader_frequency")
@@ -68,17 +70,17 @@ func PolicyLoader() {
 
 // PolicyMD5Str 计算 DynamicUpdateFiles 所包含文件的 md5 值
 func PolicyMD5Str() (string, error) {
-	contentStream := ""
+	var contentStream bytes.Buffer
 	for _, file := range DynamicUpdateFiles {
 		rawStream, err := ioutil.ReadFile(file)
 		if err != nil {
 			return "", errors.New("cannot load policy file")
 		}
-		contentStream += string(rawStream)
+		contentStream.Write(rawStream)
 	}
 
 	filesMd5 := md5.New()
-	io.WriteString(filesMd5, contentStream)
+	io.WriteString(filesMd5, contentStream.String())
 
 	stringMd5 := fmt.Sprintf("%x", filesMd5.Sum(nil))
 	return stringMd5, nil

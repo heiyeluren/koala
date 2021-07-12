@@ -10,13 +10,13 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/heiyeluren/koala/utility/logger"
+	"github.com/heiyeluren/koala/utility"
 )
 
 // CountMessage .
@@ -89,7 +89,7 @@ func CounterAgent() {
  * 记录counter数据到日志
  */
 func recordExpiredCounter(counters map[int32]*Counter) {
-	logHandle := logger.NewLogger(time.Now().Format("20060102") + "_counter")
+	logHandle := utility.NewLogger(time.Now().Format("20060102") + "_counter")
 	for k, v := range counters {
 		logMsg := fmt.Sprintf(" rule_no:%d  allow:%d  deny:%d ", k, v.allow, v.deny)
 		logHandle.Warning(logMsg)
@@ -100,7 +100,7 @@ func recordExpiredCounter(counters map[int32]*Counter) {
 func CounterClient(ruleNo int32, deny bool) {
 	msg := new(CountMessage)
 	msg.ruleNo = ruleNo
-	if deny == true {
+	if deny {
 		msg.decision = DENY
 	} else {
 		msg.decision = ALLOW

@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"encoding/json"
@@ -18,25 +18,24 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/heiyeluren/koala/utility/logger"
-	"github.com/heiyeluren/koala/utility/network"
+	"github.com/heiyeluren/koala/utility"
 )
 
 // DoRuleBrowse 查询访问接口
-func (s *FrontServer) DoRuleBrowse(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleBrowse(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	// 本地策略指针，可避免匹配过程中Global策略被替换 导致不一致
-	var localPolicy *Policy = GlobalPolicy
+	var localPolicy = GlobalPolicy
 
-	var singleRule KoalaRule
+	var singleRule Rule
 	var err error
-	var retValue RetValue = localPolicy.retValueTable[0]
+	var retValue = localPolicy.retValueTable[0]
 	// 匹配每一条rule规则
 	for _, singleRule = range localPolicy.ruleTable {
-		var satisfied bool = true
+		var satisfied = true
 		// 遍历每个key，若不匹配或者参数未传，不命中
 		for k, v := range singleRule.keys {
-			s := request.Gstr(k)
-			if s != "" && v.matches(s) {
+			str := request.Gstr(k)
+			if str != "" && v.matches(str) {
 				continue
 			}
 			satisfied = false
@@ -50,7 +49,7 @@ func (s *FrontServer) DoRuleBrowse(request *network.HttpRequest, response *netwo
 		var isOut bool
 		ruleCacheKey := singleRule.getCacheKey(request.Gets())
 		//println(ruleCacheKey)
-		switch singleRule.methord {
+		switch singleRule.method {
 		case "direct":
 			isOut = true
 		case "count":
@@ -98,7 +97,7 @@ func (s *FrontServer) DoRuleBrowse(request *network.HttpRequest, response *netwo
 }
 
 // DoRuleUpdate 更新访问接口
-func (s *FrontServer) DoRuleUpdate(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleUpdate(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	go RuleUpdateLogic(request, logHandle)
 
 	response.Puts(`{"err_no":0, "err_msg":"OK"}`)
@@ -109,7 +108,7 @@ func (s *FrontServer) DoRuleUpdate(request *network.HttpRequest, response *netwo
  *    查询缓存状态接口
  */
 /*
-func (this *FrontServer) DoRuleValue(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleValue(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
     var localPolicy *Policy = GlobalPolicy
 
     var singleRule KoalaRule
@@ -139,22 +138,22 @@ func (this *FrontServer) DoRuleValue(request *network.HttpRequest, response *net
 */
 
 // DoRuleBrowseComplete 非中断查询接口（可命中、并返回多条策略）
-func (s *FrontServer) DoRuleBrowseComplete(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleBrowseComplete(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	// 本地策略指针，可避免匹配过程中Global策略被替换 导致不一致
 	var localPolicy *Policy = GlobalPolicy
 
-	var singleRule KoalaRule
+	var singleRule Rule
 	var err error
 	// 用于返回多个结果，RetValue数组
 	var retArray []RetValue
-	var retValue RetValue = localPolicy.retValueTable[0]
+	var retValue = localPolicy.retValueTable[0]
 	// 匹配每一条rule规则
 	for _, singleRule = range localPolicy.ruleTable {
-		var satisfied bool = true
+		var satisfied = true
 		// 遍历每个key，若不匹配或者参数未传，跳过
 		for k, v := range singleRule.keys {
-			s := request.Gstr(k)
-			if s != "" && v.matches(s) {
+			str := request.Gstr(k)
+			if str != "" && v.matches(str) {
 				continue
 			}
 			satisfied = false
@@ -166,7 +165,7 @@ func (s *FrontServer) DoRuleBrowseComplete(request *network.HttpRequest, respons
 
 		// 对匹配的key，查缓存值，与阀值比较，判断是否超出限制
 		var isOut bool
-		switch singleRule.methord {
+		switch singleRule.method {
 		case "direct":
 			isOut = true
 		case "count":
@@ -219,19 +218,19 @@ func (s *FrontServer) DoRuleBrowseComplete(request *network.HttpRequest, respons
  *    反馈-feedback-接口
  */
 /*
-func (this *FrontServer) DoRuleFeedback(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoRuleFeedback(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
 
     var localPolicy *Policy = GlobalPolicy
 
     var singleRule KoalaRule
-    var feedbackType string = request.Gstr("_feedbackType")
+    var feedbackType = request.Gstr("_feedbackType")
     // 匹配每一条rule规则
     for _, singleRule = range localPolicy.ruleTable {
-        var satisfied bool = true
+        var satisfied = true
         // 遍历每个key，若不匹配或者参数未传，不命中
         for k, v := range singleRule.keys {
-            s := request.Gstr(k)
-            if s != "" && v.matches(s) {
+            str := request.Gstr(k)
+            if str != "" && v.matches(str) {
                 continue
             }
             satisfied = false
@@ -261,14 +260,14 @@ func (this *FrontServer) DoRuleFeedback(request *network.HttpRequest, response *
 */
 
 // RuleUpdateLogic 更新操作执行函数
-func RuleUpdateLogic(request *network.HttpRequest, logHandle *logger.Logger) {
+func RuleUpdateLogic(request *utility.HttpRequest, logHandle *utility.Logger) {
 	// 本地策略指针，可避免匹配过程中Global策略被替换 导致不一致
 	var localPolicy *Policy = GlobalPolicy
 
 	// 匹配每一条rule规则
-	var singleRule KoalaRule
+	var singleRule Rule
 	for _, singleRule = range localPolicy.ruleTable {
-		var satisfied bool = true
+		var satisfied = true
 		// 遍历每个key，若不匹配或者参数未传，不命中
 		for k, v := range singleRule.keys {
 			s := request.Gstr(k)
@@ -281,27 +280,25 @@ func RuleUpdateLogic(request *network.HttpRequest, logHandle *logger.Logger) {
 		if !satisfied {
 			continue
 		}
-		var ruleCacheKey string
-		var err error
 
-		ruleCacheKey = singleRule.getCacheKey(request.Gets())
+		ruleCacheKey := singleRule.getCacheKey(request.Gets())
 		// 更新cache值
-		switch singleRule.methord {
+		switch singleRule.method {
 		case "count":
 			if singleRule.count == 0 {
 				continue
 			}
-			if err = singleRule.countUpdate(ruleCacheKey); err != nil {
+			if err := singleRule.countUpdate(ruleCacheKey); err != nil {
 				logHandle.Fatal("[errmsg=" + err.Error() + "]")
 				continue
 			}
 		case "base":
-			if err = singleRule.baseUpdate(ruleCacheKey); err != nil {
+			if err := singleRule.baseUpdate(ruleCacheKey); err != nil {
 				logHandle.Fatal("[errmsg=" + err.Error() + "]")
 				continue
 			}
 		case "leak":
-			if err = singleRule.leakUpdate(ruleCacheKey); err != nil {
+			if err := singleRule.leakUpdate(ruleCacheKey); err != nil {
 				logHandle.Fatal("[errmsg=" + err.Error() + "]")
 				continue
 			}
@@ -311,11 +308,10 @@ func RuleUpdateLogic(request *network.HttpRequest, logHandle *logger.Logger) {
 }
 
 // DoMonitorAlive 监控连接redis是否成功
-func (s *FrontServer) DoMonitorAlive(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoMonitorAlive(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	redisConn := RedisPool.Get()
 	defer redisConn.Close()
-	_, err := redisConn.Do("PING")
-	if err != nil {
+	if _, err := redisConn.Do("PING"); err != nil {
 		response.Puts(`{"errno": -1, "errmsg": "redis-error!"}`)
 		response.SetCode(500)
 		logHandle.Fatal("[errmsg=" + err.Error() + "]")
@@ -348,16 +344,16 @@ type JobBuffer struct {
 }
 
 // DoMultiBrowse 多重浏览访问接口
-func (s *FrontServer) DoMultiBrowse(request *network.HttpRequest, response *network.HttpResponse, logHandle *logger.Logger) {
+func (s *FrontServer) DoMultiBrowse(request *utility.HttpRequest, response *utility.HttpResponse, logHandle *utility.Logger) {
 	argsJSON := request.Gstr("argsJson")
 	if argsJSON == "" {
 		response.SetCode(400)
 		return
 	}
 
-	var err error
 	var jobs []Job
-	if err = json.Unmarshal([]byte(argsJSON), &jobs); err != nil {
+	err := json.Unmarshal([]byte(argsJSON), &jobs)
+	if err != nil {
 		logHandle.Fatal("[errmsg=" + err.Error() + "]")
 		response.SetCode(400)
 		return
@@ -380,16 +376,16 @@ func (s *FrontServer) DoMultiBrowse(request *network.HttpRequest, response *netw
 	}
 	logMsg += " ] ["
 
-	var localPolicy *Policy = GlobalPolicy
-	var singleRule KoalaRule
+	var localPolicy = GlobalPolicy
+	var singleRule Rule
 	for _, singleRule = range localPolicy.ruleTable {
 		var cacheKeys []interface{}
 		for i, buf := range buffers {
 			buffers[i].key = ""
-			var satisfied bool = true
+			var satisfied = true
 			for k, v := range singleRule.keys {
-				s, OK := buf.args[k]
-				if OK && v.matches(s) {
+				str, OK := buf.args[k]
+				if OK && v.matches(str) {
 					continue
 				}
 				satisfied = false
@@ -406,7 +402,7 @@ func (s *FrontServer) DoMultiBrowse(request *network.HttpRequest, response *netw
 		}
 
 		var multiResult map[string]bool
-		switch singleRule.methord {
+		switch singleRule.method {
 		case "direct":
 			if multiResult, err = singleRule.multiDirectBrowse(cacheKeys); err != nil {
 				// err log
@@ -470,7 +466,7 @@ func parseJobArgs(rawArg string) map[string]string {
 	if err != nil {
 		return nil
 	}
-	kvStrings := strings.Split(string(argString), "&")
+	kvStrings := strings.Split(argString, "&")
 	for _, kvString := range kvStrings {
 		parts := strings.SplitN(kvString, "=", 2)
 		if len(parts) != 2 {

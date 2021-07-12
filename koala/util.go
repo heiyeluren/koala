@@ -10,7 +10,7 @@
  *
  */
 
-package main
+package koala
 
 import (
 	"errors"
