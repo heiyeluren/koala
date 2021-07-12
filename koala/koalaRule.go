@@ -467,7 +467,7 @@ func (k *Rule) leakUpdate(cacheKey string) error {
 	if _, err := redis.Int(redisConn.Do("LPUSH", cacheKey, now)); err != nil {
 		return err
 	}
-	if _, err := redis.Int(redisConn.Do("EXPIRE", cacheKey, 2*k.time)); err != nil {
+	if _, err := redis.Int(redisConn.Do("EXPIRE", cacheKey, k.time)); err != nil {
 		return err
 	}
 	return nil
