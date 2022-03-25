@@ -2,7 +2,4 @@ module github.com/heiyeluren/koala
 
 go 1.16
 
-require (
-	github.com/gomodule/redigo v1.8.5
-	gopkg.in/yaml.v2 v2.3.0 // indirect
-)
+require github.com/gomodule/redigo v1.8.9-0.20220324232115-5b789c6cfe82

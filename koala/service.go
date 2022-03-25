@@ -48,7 +48,7 @@ func (s *FrontServer) DoRuleBrowse(request *utility.HttpRequest, response *utili
 		// 对命中的key，查缓存值，与阀值比较，判断是否超出限制
 		var isOut bool
 		ruleCacheKey := singleRule.getCacheKey(request.Gets())
-		//println(ruleCacheKey)
+		// println(ruleCacheKey)
 		switch singleRule.method {
 		case "direct":
 			isOut = true
@@ -364,7 +364,7 @@ func (s *FrontServer) DoMultiBrowse(request *utility.HttpRequest, response *util
 	logMsg += " intf=" + request.PathInfo()
 
 	var buffers []JobBuffer
-	//var job Job
+	// var job Job
 	for _, job := range jobs {
 		var buf JobBuffer
 		buf.ID = job.ID

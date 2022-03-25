@@ -53,7 +53,7 @@ func PolicyLoader() {
 		if err != nil {
 			logHandle.Warning("[errmsg=" + err.Error() + " md5=" + PolicyMd5 + "]")
 		}
-		//println(Policy_md5)
+		// println(Policy_md5)
 
 		if m != PolicyMd5 {
 			DynamicUpdateFiles = []string{}

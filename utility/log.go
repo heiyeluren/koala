@@ -64,18 +64,18 @@ log.Warning(log_warning_msg)
 
 */
 
-//========================
+// ========================
 //
 //   外部调用Logger方法
 //
-//========================
+// ========================
 
 // Logger .Log 每次请求结构体数据
 type Logger struct {
 	LogID string
 }
 
-//日志级别类型常量
+// 日志级别类型常量
 const (
 	LogTypeFatal   = 1
 	LogTypeWarning = 2
@@ -84,7 +84,7 @@ const (
 	LogTypeDebug   = 16
 )
 
-//日志类型对应信息
+// 日志类型对应信息
 const (
 	LogTypeFatalStr   = "FATAL"
 	LogTypeWarningStr = "WARNING"
@@ -102,9 +102,9 @@ var GLogTypeMap = map[int]string{
 	LogTypeDebug:   LogTypeDebugStr,
 }
 
-//------------------------
+// ------------------------
 //   logger外部调用方法
-//------------------------
+// ------------------------
 
 // NewLogger . 构造函数
 func NewLogger(logid string) *Logger {
@@ -145,44 +145,44 @@ func (l *Logger) Warning(logMessage string) {
 	l.syncMsg(LogTypeWarning, logMessage)
 }
 
-//------------------------
+// ------------------------
 //   logger内部使用方法
-//------------------------
+// ------------------------
 
 // syncMsg .
 // 写入日志到channel .
 func (l *Logger) syncMsg(logType int, logMsg string) error {
-	//init request log
-	//Log_New()
+	// init request log
+	// Log_New()
 
-	//从配置日志级别log_level判断当前日志是否需要入channel队列
+	// 从配置日志级别log_level判断当前日志是否需要入channel队列
 	if (logType & GLogV.LogLevel) != logType {
 		return nil
 	}
 
-	//G_Log_V := Log_New(G_Log_V)
+	// G_Log_V := Log_New(G_Log_V)
 	if logType <= 0 || logMsg == "" {
 		return errors.New("log_type or log_msg param is empty")
 	}
 
-	//拼装消息内容
+	// 拼装消息内容
 	logStr := l.padMsg(logType, logMsg)
 
-	//日志类型
+	// 日志类型
 	if _, ok := GLogTypeMap[logType]; !ok {
 		return errors.New("log_type is invalid")
 	}
 
-	//设定消息格式
+	// 设定消息格式
 	logMsgData := LogMsgT{
 		LogType: logType,
 		LogData: logStr,
 	}
 
-	//写消息到channel
+	// 写消息到channel
 	GLogV.LogChan <- logMsgData
 
-	//判断当前整个channel 的buffer大小是否超过90%的阀值，超过就直接发送刷盘信号
+	// 判断当前整个channel 的buffer大小是否超过90%的阀值，超过就直接发送刷盘信号
 	var threshold float32
 	var currChanLen int = len(GLogV.LogChan)
 	threshold = float32(currChanLen) / float32(GLogV.LogChanBuffSize)
@@ -193,7 +193,7 @@ func (l *Logger) syncMsg(logType int, logMsg string) error {
 		GFlushLock.Unlock()
 
 		GLogV.FlushLogChan <- true
-		//打印目前达到阀值了
+		// 打印目前达到阀值了
 		if LogIsDebug() {
 			LogDebugPrint(fmt.Sprintf("Out threshold!! Current G_Log_V.LogChan: %v; G_Log_V.LogChanBuffSize: %v", currChanLen, GLogV.LogChanBuffSize), nil)
 		}
@@ -211,11 +211,11 @@ func (l *Logger) syncMsg(logType int, logMsg string) error {
 func (l *Logger) padMsg(logType int, logMsg string) string {
 
 	var (
-		//日志拼装格式字符串
+		// 日志拼装格式字符串
 		logFormatStr string
 		logRetStr    string
 
-		//日志所需字段变量
+		// 日志所需字段变量
 		logTypeStr  string
 		logDateTime string
 		logID       string
@@ -223,52 +223,52 @@ func (l *Logger) padMsg(logType int, logMsg string) string {
 		logLineno   int
 		logCallFunc string
 
-		//log_clientip string
-		//log_errno int
-		//log_errmsg string
+		// log_clientip string
+		// log_errno int
+		// log_errmsg string
 
-		//其他变量
+		// 其他变量
 		ok     bool
 		fcName uintptr
 	)
 
-	//获取调用的 函数/文件名/行号 等信息
+	// 获取调用的 函数/文件名/行号 等信息
 	fcName, logFilename, logLineno, ok = runtime.Caller(3)
 	if !ok {
 		errors.New("call runtime.Caller() fail")
 	}
 	logCallFunc = runtime.FuncForPC(fcName).Name()
 
-	//展现调用文件名最后两段
-	//println(log_filename)
+	// 展现调用文件名最后两段
+	// println(log_filename)
 
-	//判断当前操作系统路径分割符，获取调用文件最后两组路径信息
+	// 判断当前操作系统路径分割符，获取调用文件最后两组路径信息
 	osPathSeparator := LogGetOsSeparator(logFilename)
 	callPath := strings.Split(logFilename, osPathSeparator)
 	if pathLen := len(callPath); pathLen > 2 {
 		logFilename = strings.Join(callPath[pathLen-2:], osPathSeparator)
 	}
 
-	//获取当前日期时间 (#吐槽: 不带这么奇葩的调用参数好不啦！难道这天是Go诞生滴日子??!!!#)
+	// 获取当前日期时间 (#吐槽: 不带这么奇葩的调用参数好不啦！难道这天是Go诞生滴日子??!!!#)
 	logDateTime = time.Now().Format("2006-01-02 15:04:05")
 
-	//app name
-	//log_app_name = "koala"
+	// app name
+	// log_app_name = "koala"
 
-	//logid读取
+	// logid读取
 	logID = l.getLogID()
 
-	//日志类型
+	// 日志类型
 	if logTypeStr, ok = GLogTypeMap[logType]; !ok {
 		errors.New("log_type is invalid")
 	}
 
-	//拼装返回
+	// 拼装返回
 	logFormatStr = "%s: %s [logid=%s file=%s no=%d call=%s] %s\n"
 	logRetStr = fmt.Sprintf(logFormatStr, logTypeStr, logDateTime, logID, logFilename, logLineno, logCallFunc, logMsg)
 
-	//调试
-	//println(log_ret_str)
+	// 调试
+	// println(log_ret_str)
 
 	return logRetStr
 }
@@ -277,7 +277,7 @@ func (l *Logger) padMsg(logType int, logMsg string) string {
 // 说明：从客户端request http头里看看是否可以获得logid，http头里可以传递一个：WD_REQUEST_ID
 // 如果没有传递，则自己生成唯一logid
 func (l *Logger) getLogID() string {
-	//获取request http头中的logid字段
+	// 获取request http头中的logid字段
 	if l.LogID != "" {
 		return l.LogID
 	}
@@ -287,20 +287,20 @@ func (l *Logger) getLogID() string {
 // genLogID 生成当前请求的Log ID
 // 策略：主要是保证唯一logid，采用当前纳秒级时间+随机数生成
 func (l *Logger) genLogID() string {
-	//获取当前时间
+	// 获取当前时间
 	microTime := time.Now().UnixNano()
-	//生成随机数
+	// 生成随机数
 	randNum := rand.New(rand.NewSource(microTime)).Intn(100000)
-	//生成logid：把纳秒时间+随机数生成 (注意：int64的转string使用 FormatInt，int型使用Itoa就行了)
-	//logid := fmt.Sprintf("%d%d", microTime, randNum)
+	// 生成logid：把纳秒时间+随机数生成 (注意：int64的转string使用 FormatInt，int型使用Itoa就行了)
+	// logid := fmt.Sprintf("%d%d", microTime, randNum)
 	return strconv.FormatInt(microTime, 10) + strconv.Itoa(randNum)
 }
 
-//========================
+// ========================
 //
 //   内部协程Run函数
 //
-//========================
+// ========================
 
 // LogMsgT 单条日志结构
 type LogMsgT struct {
@@ -311,51 +311,51 @@ type LogMsgT struct {
 // LogT Log主chan队列配置
 type LogT struct {
 
-	//------------------
+	// ------------------
 	//  Channel数据
-	//------------------
+	// ------------------
 
-	//日志接收channel队列
+	// 日志接收channel队列
 	LogChan chan LogMsgT
 
-	//是否马上日志刷盘: true or false，如果为true，则马上日志刷盘 (本chan暂时没有使用)
+	// 是否马上日志刷盘: true or false，如果为true，则马上日志刷盘 (本chan暂时没有使用)
 	FlushLogChan chan bool
 
-	//------------------
+	// ------------------
 	// 配置相关数据
-	//------------------
+	// ------------------
 
-	//所有日志文件位置
+	// 所有日志文件位置
 	LogFilePath map[int]string
 
-	//日志文件位置 (例：/var/log/koala.log 和 /var/log/koala.log.wf)
+	// 日志文件位置 (例：/var/log/koala.log 和 /var/log/koala.log.wf)
 	LogNoticeFilePath string
 	LogErrorFilePath  string
 
-	//写入日志切割周期（1天:day、1小时:hour、15分钟：Fifteen、10分钟：Ten）
+	// 写入日志切割周期（1天:day、1小时:hour、15分钟：Fifteen、10分钟：Ten）
 	LogCronTime string
 
-	//日志chan队列的buffer长度，建议不要少于1024，不多于102400，最长：2147483648
+	// 日志chan队列的buffer长度，建议不要少于1024，不多于102400，最长：2147483648
 	LogChanBuffSize int
 
-	//按照间隔时间日志刷盘的日志的间隔时间，单位：秒，建议1~5秒，不超过256
+	// 按照间隔时间日志刷盘的日志的间隔时间，单位：秒，建议1~5秒，不超过256
 	LogFlushTimer int
 
-	//------------------
+	// ------------------
 	// 运行时相关数据
-	//------------------
+	// ------------------
 
-	//去重的日志文件名和fd (实际需需要物理写入文件名和句柄)
+	// 去重的日志文件名和fd (实际需需要物理写入文件名和句柄)
 	MergeLogFile map[string]string
 	MergeLogFd   map[string]*os.File
 
-	//上游配置的map数据(必须包含所有所需项)
+	// 上游配置的map数据(必须包含所有所需项)
 	RunConfigMap map[string]string
 
-	//是否开启日志库调试模式
+	// 是否开启日志库调试模式
 	LogDebugOpen bool
 
-	//日志打印的级别（需要打印那些日志）
+	// 日志打印的级别（需要打印那些日志）
 	LogLevel int
 
 	// 日志文件的存在时间, 单位:天
@@ -380,7 +380,7 @@ const (
 	LogConfFileLifeTime = "log_file_life_time"
 )
 
-//配置选项值类型(字符串或数字)
+// 配置选项值类型(字符串或数字)
 const (
 	LogConfTypeStr = 1
 	LogConfTypeNum = 2
@@ -420,7 +420,7 @@ var GOnceV sync.Once
 // GFlushLogFlag 目前是否已经写入刷盘操作channel（保证全局只能写入一次，防止多协程操作阻塞）
 var GFlushLogFlag bool = false
 
-//GFlushLock 控制 GFlushLogFlag 的全局锁
+// GFlushLock 控制 GFlushLogFlag 的全局锁
 var GFlushLock *sync.Mutex = &sync.Mutex{}
 
 /**
@@ -445,55 +445,55 @@ go LogRun(m)
 
 // LogRun . 注意： 需要传递进来的配置是有要求的，必须是包含这些配置选项，否则会报错
 func LogRun(RunConfigMap map[string]string) {
-	//初始化全局变量
+	// 初始化全局变量
 	if GLogV == nil {
 		GLogV = new(LogT)
 	}
 
-	//设置配置map数据
+	// 设置配置map数据
 	GLogV.RunConfigMap = RunConfigMap
 
-	//调用初始化操作，全局只运行一次
+	// 调用初始化操作，全局只运行一次
 	GOnceV.Do(LogInit)
 
-	//启动log文件清理协程，定期删除过期的log文件
+	// 启动log文件清理协程，定期删除过期的log文件
 	go LogfileCleanup(int64(GLogV.LogLifeTime * 3600 * 24))
 
-	//永远循环等待channel的日志数据
+	// 永远循环等待channel的日志数据
 	var logMsg LogMsgT
-	//var num int64
+	// var num int64
 	for {
-		//监控是否有可以日志可以存取
+		// 监控是否有可以日志可以存取
 		select {
 		case logMsg = <-GLogV.LogChan:
 			LogWriteFile(logMsg)
-			//if Log_Is_Debug() {
+			// if Log_Is_Debug() {
 			//    Log_Debug_Print("G_Log_V.LogChan Length:", len(G_Log_V.LogChan))
-			//}
+			// }
 		default:
-			//breakLogChan长度
-			//println("In Default ", num)
-			//打印目前G_Log_V的数据
-			//if Log_Is_Debug() {
+			// breakLogChan长度
+			// println("In Default ", num)
+			// 打印目前G_Log_V的数据
+			// if Log_Is_Debug() {
 			//    Log_Debug_Print("G_Log_V.LogChan Length:", len(G_Log_V.LogChan))
-			//}
+			// }
 			time.Sleep(time.Duration(GLogV.LogFlushTimer) * time.Millisecond)
 		}
 
-		//监控刷盘timer
-		//log_timer := time.NewTimer(time.Duration(G_Log_V.LogFlushTimer) * time.Millisecond)
+		// 监控刷盘timer
+		// log_timer := time.NewTimer(time.Duration(G_Log_V.LogFlushTimer) * time.Millisecond)
 		select {
-		//超过设定时间开始检测刷盘（保证不会频繁写日志操作）
-		//case <-log_timer.C:
+		// 超过设定时间开始检测刷盘（保证不会频繁写日志操作）
+		// case <-log_timer.C:
 		//    log_timer.Stop()
 		//    break
-		//如果收到刷盘channel的信号则刷盘且全局标志状态为
+		// 如果收到刷盘channel的信号则刷盘且全局标志状态为
 		case <-GLogV.FlushLogChan:
 			GFlushLock.Lock()
 			GFlushLogFlag = false
 			GFlushLock.Unlock()
 
-			//log_timer.Stop()
+			// log_timer.Stop()
 			break
 		default:
 			break
@@ -509,32 +509,32 @@ func LogInit() {
 		errors.New("Log_Init fail: RunConfigMap data is nil")
 	}
 
-	//构建日志文件名和文件句柄map内存
+	// 构建日志文件名和文件句柄map内存
 	GLogV.LogFilePath = make(map[int]string, len(GLogTypeMap))
 
-	//判断各个配置选项是否存在
+	// 判断各个配置选项是否存在
 	for confItemKey := range GConfItemMap {
 		if _, ok := GLogV.RunConfigMap[confItemKey]; !ok {
 			fmt.Errorf("Log_Init fail: RunConfigMap not include item: %s", confItemKey)
 		}
 	}
 
-	//扫描所有配置选项赋值给结构体
+	// 扫描所有配置选项赋值给结构体
 	var err error
 	var itemValStr string
 	var itemValNum int
 	for confItemK, confItemV := range GConfItemMap {
-		//对所有配置选项 进行类型转换
+		// 对所有配置选项 进行类型转换
 		if confItemV == LogConfTypeStr {
 			itemValStr = string(GLogV.RunConfigMap[confItemK])
 		} else if confItemV == LogConfTypeNum {
 			if itemValNum, err = strconv.Atoi(GLogV.RunConfigMap[confItemK]); err != nil {
-				fmt.Errorf("Log conf read map[%s] fail, map is error", confItemK)
+				fmt.Errorf("log conf read map[%s] fail, map is error", confItemK)
 			}
 		}
-		//进行各选项赋值
+		// 进行各选项赋值
 		switch confItemK {
-		//日志文件路径
+		// 日志文件路径
 		case LogConfNoticeFilePath:
 			GLogV.LogFilePath[LogTypeNotice] = itemValStr
 		case LogConfDebugFilePath:
@@ -546,7 +546,7 @@ func LogInit() {
 		case LogConfWarningFilePath:
 			GLogV.LogFilePath[LogTypeWarning] = itemValStr
 
-		//其他配置选项
+		// 其他配置选项
 		case LogConfCronTime:
 			GLogV.LogCronTime = itemValStr
 		case LogConfChanBuffSize:
@@ -566,13 +566,13 @@ func LogInit() {
 		}
 	}
 
-	//设置日志channel buffer
+	// 设置日志channel buffer
 	if GLogV.LogChanBuffSize <= 0 {
 		GLogV.LogChanBuffSize = 1024
 	}
 	GLogV.LogChan = make(chan LogMsgT, GLogV.LogChanBuffSize)
 
-	//初始化唯一的日志文件名和fd
+	// 初始化唯一的日志文件名和fd
 	GLogV.MergeLogFile = make(map[string]string, len(GLogTypeMap))
 	GLogV.MergeLogFd = make(map[string]*os.File, len(GLogTypeMap))
 	for _, logFilePath := range GLogV.LogFilePath {
@@ -580,7 +580,7 @@ func LogInit() {
 		GLogV.MergeLogFd[logFilePath] = nil
 	}
 
-	//打印目前G_Log_V的数据
+	// 打印目前G_Log_V的数据
 	if LogIsDebug() {
 		LogDebugPrint("G_Log_V data:", GLogV)
 	}
@@ -595,38 +595,38 @@ func LogInit() {
 // LogWriteFile .
 // 写日志操作
 func LogWriteFile(logMsg LogMsgT) {
-	//读取多少行开始写日志
-	//var max_line_num int
+	// 读取多少行开始写日志
+	// var max_line_num int
 
-	//临时变量
+	// 临时变量
 	var (
-		//动态生成需要最终输出的日志map
+		// 动态生成需要最终输出的日志map
 		logMap map[string][]string
-		//读取单条的日志消息
+		// 读取单条的日志消息
 		logMsgVar LogMsgT
-		//读取单个配置的日志文件名
+		// 读取单个配置的日志文件名
 		confFileName string
 
 		writeBuf string
 		line     string
 	)
 
-	//打开文件
+	// 打开文件
 	LogOpenFile()
 
-	//初始化map数据都为
+	// 初始化map数据都为
 	logMap = make(map[string][]string, len(GConfFileToTypeMap))
 	for confFileName = range GLogV.MergeLogFile {
 		logMap[confFileName] = []string{}
 	}
-	//fmt.Println(log_map)
+	// fmt.Println(log_map)
 
-	//压入第一条读取的日志(上游select读取的)
+	// 压入第一条读取的日志(上游select读取的)
 	confFileName = GLogV.LogFilePath[logMsg.LogType]
 	logMap[confFileName] = []string{logMsg.LogData}
-	//fmt.Println(log_map)
+	// fmt.Println(log_map)
 
-	//读取日志(所有可读的日志都读取，然后按照需要打印的文件压入到不同map数组)
+	// 读取日志(所有可读的日志都读取，然后按照需要打印的文件压入到不同map数组)
 	select {
 	case logMsgVar = <-GLogV.LogChan:
 		confFileName = GLogV.LogFilePath[logMsgVar.LogType]
@@ -634,12 +634,12 @@ func LogWriteFile(logMsg LogMsgT) {
 	default:
 		break
 	}
-	//调试信息
+	// 调试信息
 	if LogIsDebug() {
 		LogDebugPrint("Log Map:", logMap)
 	}
 
-	//写入所有日志(所有map所有文件的都写)
+	// 写入所有日志(所有map所有文件的都写)
 	for confFileName = range GLogV.MergeLogFile {
 		if len(logMap[confFileName]) > 0 {
 			writeBuf = ""
@@ -649,7 +649,7 @@ func LogWriteFile(logMsg LogMsgT) {
 			_, _ = GLogV.MergeLogFd[confFileName].WriteString(writeBuf)
 			_ = GLogV.MergeLogFd[confFileName].Sync()
 
-			//调试信息
+			// 调试信息
 			if LogIsDebug() {
 				LogDebugPrint("Log String:", writeBuf)
 			}
@@ -670,40 +670,40 @@ func LogOpenFile() error {
 		newLogFileFd   *os.File
 	)
 
-	//构造日志文件名
+	// 构造日志文件名
 	fileSuffix = LogGetFileSuffix(time.Now())
 
-	//把重复日志文件都归一，然后进行相应日志文件的操作
+	// 把重复日志文件都归一，然后进行相应日志文件的操作
 	for confFileName, runFileName = range GLogV.MergeLogFile {
 		newLogFileName = fmt.Sprintf("%s.%s", confFileName, fileSuffix)
 
-		//如果新旧文件名不同，说明需要切割文件了(第一次运行则是全部初始化文件)
+		// 如果新旧文件名不同，说明需要切割文件了(第一次运行则是全部初始化文件)
 		if newLogFileName != runFileName {
-			//关闭旧日志文件
+			// 关闭旧日志文件
 			if GLogV.MergeLogFd[confFileName] != nil {
 				if err = GLogV.MergeLogFd[confFileName].Close(); err != nil {
-					fmt.Errorf("Close log file %s fail", runFileName)
+					fmt.Errorf("close log file %s fail", runFileName)
 				}
 			}
-			//初始化新日志文件
+			// 初始化新日志文件
 			GLogV.MergeLogFile[confFileName] = newLogFileName
 			GLogV.MergeLogFd[confFileName] = nil
 
-			//创建&打开新日志文件
+			// 创建&打开新日志文件
 			newLogFileFd, err = os.OpenFile(newLogFileName, os.O_WRONLY|os.O_CREATE, 0644)
 			if err != nil {
-				fmt.Errorf("Open log file %s fail", newLogFileName)
+				fmt.Errorf("open log file %s fail", newLogFileName)
 			}
 			newLogFileFd.Seek(0, io.SeekEnd)
 
-			//把处理的相应的结果进行赋值
+			// 把处理的相应的结果进行赋值
 			GLogV.MergeLogFile[confFileName] = newLogFileName
 			GLogV.MergeLogFd[confFileName] = newLogFileFd
 		}
 	}
 
-	//调试
-	//fmt.Println(G_Log_V)
+	// 调试
+	// fmt.Println(G_Log_V)
 
 	return nil
 }
@@ -715,23 +715,23 @@ func LogOpenFile() error {
 // 1天:day; 1小时:hour; 10分钟:ten
 func LogGetFileSuffix(now time.Time) string {
 	var fileSuffix string
-	//now := time.Now()
+	// now := time.Now()
 
 	switch GLogV.LogCronTime {
 
-	//按照天切割日志
+	// 按照天切割日志
 	case "day":
 		fileSuffix = now.Format("20060102")
 
-	//按照小时切割日志
+	// 按照小时切割日志
 	case "hour":
 		fileSuffix = now.Format("20060102_15")
 
-	//按照10分钟切割日志
+	// 按照10分钟切割日志
 	case "ten":
 		fileSuffix = fmt.Sprintf("%s%d0", now.Format("20060102_15"), int(now.Minute()/10))
 
-	//缺省按照小时
+	// 缺省按照小时
 	default:
 		fileSuffix = now.Format("20060102_15")
 	}
@@ -749,7 +749,7 @@ func LogIsDebug() bool {
 // 日志打印输出到终端函数
 func LogDebugPrint(msg string, v interface{}) {
 
-	//获取调用的 函数/文件名/行号 等信息
+	// 获取调用的 函数/文件名/行号 等信息
 	fcName, logFilename, logLineno, ok := runtime.Caller(1)
 	if !ok {
 		errors.New("call runtime.Caller() fail")
@@ -775,7 +775,7 @@ func LogDebugPrint(msg string, v interface{}) {
 // 获取当前操作系统的路径切割符
 // 说明: 主要为了解决 os.PathSeparator有些时候无法满足要求的问题
 func LogGetOsSeparator(pathName string) string {
-	//判断当前操作系统路径分割符
+	// 判断当前操作系统路径分割符
 	var osPathSeparator = "/"
 	if strings.ContainsAny(pathName, "\\") {
 		osPathSeparator = "\\"
@@ -787,7 +787,7 @@ func LogGetOsSeparator(pathName string) string {
 // 对notice日志，进行定期清理，执行周期等同于“日志切割周期”
 func LogfileCleanup(fileLifetime int64) {
 
-	// println("clean up gorouting start!")
+	// println("clean up goroutine start!")
 
 	// 5秒后再启动“清理”循环，错开启动初期的不稳定时段
 	time.Sleep(time.Duration(5) * time.Second)

@@ -719,6 +719,7 @@ func (r *HttpResponse) Stream() []byte {
 	return b.Bytes()
 }
 
+// String . return string
 func (r *HttpResponse) String() string {
 	return string(r.Stream())
 }
