@@ -170,7 +170,7 @@ func (k *RangeKey) build(sp, ki, v string) error {
  * matches
  */
 func (k *RangeKey) matches(s string) bool {
-	// + 号，任意值逻辑，直接matche
+	// + 号，任意值逻辑，直接matches
 	for _, sco := range k.scopes {
 		if sco.op == "+" {
 			return true

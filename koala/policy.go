@@ -122,7 +122,7 @@ func PolicyInterpreter(extStream string) error {
 		if err = rulesBuilder(line); err != nil {
 			return errors.New(err.Error() + "  ;AT-LINE-" + strconv.Itoa(index) + "; " + line)
 		}
-		//println(line)
+		// println(line)
 	}
 
 	// 解析返回结果配置
@@ -213,7 +213,7 @@ func resultsBuilder(result string) error {
 	if err = json.Unmarshal([]byte(inString), &ret); err != nil {
 		return err
 	}
-	//fmt.Printf("%+v \n", ret)
+	// fmt.Printf("%+v \n", ret)
 	TempPolicy.retValueTable[retType] = ret
 	return nil
 }

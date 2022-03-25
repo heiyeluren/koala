@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"github.com/gomodule/redigo/redis"
+
 	"github.com/heiyeluren/koala/utility"
 )
 

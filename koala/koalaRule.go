@@ -29,7 +29,7 @@ const (
 
 // Rule rule类型
 type Rule struct {
-	method     string //只能为如下四个字符串 count base direct leak
+	method     string // 只能为如下四个字符串 count base direct leak
 	keys       map[string]KoalaKey
 	base       int32
 	time       int32
@@ -255,7 +255,7 @@ func (k *Rule) getCacheValue(cacheKey string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	//println(cacheKey, " --> value:", cacheValue)
+	// println(cacheKey, " --> value:", cacheValue)
 	return cacheValue, nil
 }
 
@@ -276,7 +276,7 @@ func (k *Rule) countBrowse(cacheKey string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	//println(cacheKey, " --> value:", cacheValue)
+	// println(cacheKey, " --> value:", cacheValue)
 	if k.count == 0 || k.count > int32(cacheValue) {
 		return false, nil
 	}
@@ -340,7 +340,7 @@ func (k *Rule) baseBrowse(cacheKey string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	//println(cacheKey, " --> value:", cacheValue)
+	// println(cacheKey, " --> value:", cacheValue)
 	if k.base == 0 || k.base > int32(cacheValue) {
 		return false, nil
 	}
@@ -355,7 +355,7 @@ func (k *Rule) baseBrowse(cacheKey string) (bool, error) {
 		return false, err
 	}
 
-	//println(cacheKey_time, " --> value:", cacheValue)
+	// println(cacheKey_time, " --> value:", cacheValue)
 	if k.count == 0 || k.count > int32(cacheValue) {
 		return false, nil
 	}
