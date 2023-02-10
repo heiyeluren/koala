@@ -244,7 +244,12 @@ https://github.com/heiyeluren/koala/tree/main/doc
 <br />
 
 ##### 加入微信群交流
-![image](https://raw.githubusercontent.com/heiyeluren/docs/master/imgs/koala_wx_group.png)
+
+欢迎加入 Koala 技术交流微信群，要加群，可以先关注添加如下公众号：<br />
+（如无法看到图片，请直接微信里搜索公众号“黑夜路人技术”，关注发送“加群”字样信息即可 ）
+
+<img src=https://raw.githubusercontent.com/heiyeluren/xmm/main/docs/img/heiyeluren-tech-wx-public.jpg width=40% />
+
 
 <br />
 
